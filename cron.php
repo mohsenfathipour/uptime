@@ -1,5 +1,5 @@
 <?php
-
+date_default_timezone_set('Asia/Tehran');
 $server_list = ['barakat'];
 
 // Define a function to get the last stored timestamp
@@ -60,9 +60,45 @@ function increaseSmsCount($serverName)
     return $smsCount;
 }
 
-// Define a function to send an SMS (simulated)
-function sendSMS()
+
+function sendSms($mobile, $server)
 {
+    $path = 'https://api.kavenegar.com/v1/39436C63716F4844736D674B4C2B71724E426F6F6138486271387A704F5A496F/verify/lookup.json';
+
+    $params = [
+        "receptor" => $mobile,
+        "template" => "monitoringSystem",
+        "token" => $server
+    ];
+
+    $queryString = http_build_query($params);
+    $fullPath = $path . '?' . $queryString;
+
+    $ch = curl_init();
+
+    curl_setopt($ch, CURLOPT_URL, $fullPath);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+    $response = curl_exec($ch);
+
+    if (curl_errno($ch)) {
+        // Handle cURL error
+        echo 'cURL Error: ' . curl_error($ch);
+    } else {
+        $res = json_decode($response, true);
+        // Process the $res variable as needed
+    }
+
+    curl_close($ch);
+}
+
+
+// Define a function to send an SMS (simulated)
+function alert($serverName)
+{
+
+    sendSms('09125676987', $serverName);
+    sendSms('09352886868', $serverName);
 
     // Set the URL
     $url = 'https://bot.boodje.com/sendmessage';
@@ -87,14 +123,17 @@ function sendSMS()
 
 // Output the response
     echo $response;
+
+
 }
 
 // Handle the API check
 if (empty($_GET['server']) || !in_array($_GET['server'], $server_list)) {
-    die('Unknown Server');
+    $serverName = 'barakat';
+} else {
+    $serverName = $_GET['server'];
 }
 
-$serverName = $_GET['server'];
 $lastTimestamp = getLastTimestamp($serverName);
 
 if ($lastTimestamp == null) {
@@ -104,7 +143,7 @@ if ($lastTimestamp == null) {
 $currentTime = time();
 $timeDiff = $currentTime - $lastTimestamp;
 
-if ($timeDiff < 900) { // 900 seconds = 15 minutes
+if ($timeDiff < 300) { // 900 seconds = 15 minutes
     echo "Not enough time has passed since the last API call.\n";
     exit;
 }
@@ -115,5 +154,5 @@ if (getLastTimestampSms($serverName) > 3) {
     exit;
 }
 
-sendSMS();
+alert($serverName);
 increaseSmsCount($serverName);

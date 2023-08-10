@@ -1,4 +1,5 @@
 <?php
+date_default_timezone_set('Asia/Tehran');
 
 $server_list = ['barakat'];
 
@@ -17,4 +18,5 @@ if(empty($_GET['server']) || !in_array($_GET['server'],$server_list)) {
 }
 
 $storedTimestamp = storeTimestamp($_GET['server']);
-echo "Timestamp stored: " . date('Y-m-d H:i:s', $storedTimestamp);
+echo "Timestamp stored: " . date('Y-m-d H:i:s', $storedTimestamp) . "\n";
+
